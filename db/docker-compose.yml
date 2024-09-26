@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - '5402:5432'
+    volumes:
+      - ./tmp:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_DB: backend_diff_db
+      POSTGRES_USER: development
+      POSTGRES_PASSWORD: dev_pass
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U development -d backend_diff_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8085:8080'

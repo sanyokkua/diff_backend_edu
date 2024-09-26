@@ -636,3 +636,5 @@ frontend/*.sw?
 backend_nodejs/node_modules
 
 .idea
+
+db/tmp/*
