@@ -39,6 +39,7 @@ class AuthUserExtractionServiceTest {
 
     @BeforeEach
     void setUp() {
+        //noinspection resource
         MockitoAnnotations.openMocks(this);
     }
 

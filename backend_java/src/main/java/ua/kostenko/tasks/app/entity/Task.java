@@ -1,10 +1,7 @@
 package ua.kostenko.tasks.app.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * Represents a task entity in the system.
@@ -25,6 +22,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"user"})
+@EqualsAndHashCode(exclude = {"user"})
 public class Task {
 
     /**

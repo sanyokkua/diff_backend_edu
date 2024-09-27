@@ -86,8 +86,7 @@ public class CustomRestExceptionHandler {
      *
      * @return ResponseEntity with a 403 Forbidden status and error details
      */
-    @ExceptionHandler({AccessDeniedException.class  // Use any specific access-related exception here
-    })
+    @ExceptionHandler({AccessDeniedException.class})
     public ResponseEntity<ResponseDto<Object>> handleAccessDeniedException(Exception ex, HttpServletRequest request) {
         return buildErrorResponse(ex, request, HttpStatus.FORBIDDEN);
     }

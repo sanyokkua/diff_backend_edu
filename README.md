@@ -149,13 +149,13 @@ The following API endpoints should be implemented via different technologies:
 
 ### Task Management REST Controller
 
-| HTTP Method | Path                            | Description                                                     |
-|-------------|---------------------------------|-----------------------------------------------------------------|
-| GET         | /api/v1/{userId}/tasks          | Retrieves all tasks for the authenticated user.                 |
-| POST        | /api/v1/{userId}/tasks/         | Creates a new task for the authenticated user.                  |
-| GET         | /api/v1/{userId}/tasks/{taskId} | Retrieves a specific task by its ID for the authenticated user. |
-| PUT         | /api/v1/{userId}/tasks/{taskId} | Updates an existing task for the authenticated user.            |
-| DELETE      | /api/v1/{userId}/tasks/{taskId} | Deletes a specific task by its ID for the authenticated user.   |
+| HTTP Method | Path                                  | Description                                                     |
+|-------------|---------------------------------------|-----------------------------------------------------------------|
+| GET         | /api/v1/users/{userId}/tasks          | Retrieves all tasks for the authenticated user.                 |
+| POST        | /api/v1/users/{userId}/tasks/         | Creates a new task for the authenticated user.                  |
+| GET         | /api/v1/users/{userId}/tasks/{taskId} | Retrieves a specific task by its ID for the authenticated user. |
+| PUT         | /api/v1/users/{userId}/tasks/{taskId} | Updates an existing task for the authenticated user.            |
+| DELETE      | /api/v1/users/{userId}/tasks/{taskId} | Deletes a specific task by its ID for the authenticated user.   |
 
 #### Example Request and Response Payloads
 

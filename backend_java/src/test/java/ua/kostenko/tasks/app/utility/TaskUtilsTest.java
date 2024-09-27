@@ -64,6 +64,7 @@ class TaskUtilsTest {
         verify(taskRepository).findByUserAndName(user, "Test Task");
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     void checkTaskExistsForUser_nullUser_shouldThrowException() {
         // Act & Assert

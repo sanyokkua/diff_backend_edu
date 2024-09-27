@@ -10,6 +10,7 @@ import ua.kostenko.tasks.app.dto.ResponseDto;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("DataFlowIssue")
 class ResponseDtoUtilsTest {
 
     private ResponseDto<String> responseDto;

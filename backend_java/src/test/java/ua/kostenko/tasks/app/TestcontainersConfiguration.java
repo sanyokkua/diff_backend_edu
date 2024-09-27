@@ -7,11 +7,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+public class TestcontainersConfiguration {
 
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgresContainer() {
+        //noinspection resource
         return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")).withInitScript("init_db.sql");
     }
 

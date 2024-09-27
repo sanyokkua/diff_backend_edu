@@ -29,7 +29,7 @@ import java.util.Objects;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtService jwtUtil;
-    private final UserRepository authenticationService;
+    private final UserRepository userRepository;
 
     /**
      * Extracts the JWT token from the "Authorization" header of the HTTP request.
@@ -114,7 +114,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             log.debug("JWT is valid, attempting to authenticate user with email: {}", email);
 
             // Fetch the user associated with the extracted email
-            var foundUser = authenticationService.findByEmail(email);
+            var foundUser = userRepository.findByEmail(email);
 
             if (foundUser.isPresent()) {
                 log.debug("User found for email: {}, setting security context", email);

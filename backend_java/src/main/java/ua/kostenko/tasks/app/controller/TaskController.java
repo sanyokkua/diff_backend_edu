@@ -30,7 +30,7 @@ import java.util.Optional;
 @Tag(name = "Task Management REST Controller", description = "Handles operations related to user tasks.")
 @Slf4j
 @RestController
-@RequestMapping("api/v1/{userId}/tasks")
+@RequestMapping("api/v1/users/{userId}/tasks")
 @RequiredArgsConstructor
 public class TaskController {
 
