@@ -1,80 +1,112 @@
-import { Alert, Box, Button, CircularProgress, Snackbar, TextField, Typography } from "@mui/material";
-import { FC, useState }                                                          from "react";
-import { useSelector }                                                           from "react-redux";
+import { Box, Button, CircularProgress, TextField, Typography } from "@mui/material";
+import { FC, JSX, useEffect, useState }                         from "react";
+import { useSelector }                                          from "react-redux";
 import {
     deleteUser,
+    LogLevel,
     parseErrorMessage,
     RootState,
+    setFeedback,
+    setHeaderTitle,
     updateUser,
     useAppDispatch,
     UserDeleteRequest,
     UserUpdateRequest
-}                                                                                from "../../core";
+}                                                               from "../../core";
 
 
-const ProfilePage: FC = () => {
+const logger = LogLevel.getLogger("ProfilePage");
+/**
+ * ProfilePage component is a functional React component that provides users with the ability to
+ * update their password and delete their account. It interacts with the Redux store to manage
+ * user state and provides feedback through the UI.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered ProfilePage component.
+ */
+const ProfilePage: FC = (): JSX.Element => {
     const dispatch = useAppDispatch();
-    const { userId, userEmail, appIsLoading, appError } = useSelector((state: RootState) => state.globals);
+    const { userId, userEmail, userIsLoading } = useSelector((state: RootState) => state.users);
 
-    const [currentPassword, setCurrentPassword] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [newPasswordConfirmation, setNewPasswordConfirmation] = useState("");
-    const [deletePassword, setDeletePassword] = useState("");
+    // State hooks for form inputs and feedback
+    const [currentPassword, setCurrentPassword] = useState<string>("");
+    const [newPassword, setNewPassword] = useState<string>("");
+    const [newPasswordConfirmation, setNewPasswordConfirmation] = useState<string>("");
+    const [deletePassword, setDeletePassword] = useState<string>("");
 
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [showSnackbar, setShowSnackbar] = useState(false);
+    // Set the header title on component mount
+    useEffect(() => {
+        dispatch(setHeaderTitle("Profile"));
+    }, [dispatch]);
 
-    const handleCloseSnackbar = () => {
-        setShowSnackbar(false);
-        setErrorMessage(null);
-    };
-
+    /**
+     * Validates the password fields for update functionality.
+     * Checks if all fields are filled and if the new password matches the confirmation.
+     *
+     * @returns {boolean} True if passwords are valid; otherwise, false.
+     */
     const validatePasswords = (): boolean => {
         if (!currentPassword || !newPassword || !newPasswordConfirmation) {
-            setErrorMessage("All password fields are required.");
-            setShowSnackbar(true);
+            dispatch(setFeedback({ message: "All password fields are required.", severity: "error" }));
             return false;
         }
         if (newPassword !== newPasswordConfirmation) {
-            setErrorMessage("New password and confirmation password must match.");
-            setShowSnackbar(true);
+            dispatch(setFeedback({ message: "New password and confirmation must match.", severity: "error" }));
             return false;
         }
         return true;
     };
 
-    const handleUpdatePassword = async () => {
+    /**
+     * Handles the password update process.
+     * Validates input, constructs a UserUpdateRequest object, and dispatches the update action.
+     * Provides feedback on success or failure.
+     *
+     * @async
+     * @returns {Promise<void>} A promise that resolves when the update is complete.
+     */
+    const handleUpdatePassword = async (): Promise<void> => {
+        logger.debug("Attempting to update password");
         if (!validatePasswords()) {
             return;
         }
 
-        const updReq: UserUpdateRequest = {
-            userId: userId,
+        const updateRequest: UserUpdateRequest = {
+            userId,
             userUpdateDTO: {
-                currentPassword: currentPassword,
-                newPassword: newPassword,
-                newPasswordConfirmation: newPasswordConfirmation
+                currentPassword,
+                newPassword,
+                newPasswordConfirmation
             }
         };
 
         try {
-            await dispatch(updateUser(updReq)).unwrap();
+            await dispatch(updateUser(updateRequest)).unwrap();
+            dispatch(setFeedback({ message: "Password updated successfully.", severity: "success" }));
         } catch (error) {
-            const errMsg = parseErrorMessage(error);
-            setErrorMessage(errMsg);
-            setShowSnackbar(true);
+            const errorMessage = parseErrorMessage(error, "Failed to update password");
+            dispatch(setFeedback({ message: errorMessage, severity: "error" }));
+            logger.error(errorMessage);
         }
     };
 
-    const handleDeleteAccount = async () => {
+    /**
+     * Handles the account deletion process.
+     * Validates the input, constructs a UserDeleteRequest object, and dispatches the delete action.
+     * Provides feedback on success or failure.
+     *
+     * @async
+     * @returns {Promise<void>} A promise that resolves when the deletion is complete.
+     */
+    const handleDeleteAccount = async (): Promise<void> => {
+        logger.debug("Attempting to delete account");
         if (!deletePassword) {
-            setErrorMessage("Password is required to delete account.");
-            setShowSnackbar(true);
+            dispatch(setFeedback({ message: "Password is required to delete the account.", severity: "error" }));
             return;
         }
 
-        const delReq: UserDeleteRequest = {
-            userId: userId,
+        const deleteRequest: UserDeleteRequest = {
+            userId,
             userDeletionDTO: {
                 email: userEmail,
                 currentPassword: deletePassword
@@ -82,108 +114,98 @@ const ProfilePage: FC = () => {
         };
 
         try {
-            await dispatch(deleteUser(delReq)).unwrap();
+            await dispatch(deleteUser(deleteRequest)).unwrap();
+            dispatch(setFeedback({ message: "Account deleted successfully.", severity: "success" }));
         } catch (error) {
-            const errMsg = parseErrorMessage(error);
-            setErrorMessage(errMsg);
-            setShowSnackbar(true);
+            const errorMessage = parseErrorMessage(error, "Failed to delete account");
+            dispatch(setFeedback({ message: errorMessage, severity: "error" }));
+            logger.error(errorMessage);
         }
     };
 
     return (
-        <Box sx={ { maxWidth: 400, mx: "auto", mt: 4 } }>
-            <Typography variant="h5" gutterBottom>
-                Account Settings
-            </Typography>
-
-            { appError && (
-                <Alert severity="error" sx={ { mb: 2 } }>
-                    { appError }
-                </Alert>
-            ) }
-
-            <Snackbar
-                open={ showSnackbar }
-                autoHideDuration={ 6000 }
-                onClose={ handleCloseSnackbar }
-                message={ errorMessage }
-                anchorOrigin={ { vertical: "top", horizontal: "center" } }
-            />
-
-            <Box component="section" sx={ { mb: 4 } }>
-                <Typography variant="h6" gutterBottom>
-                    Change Password
+        <>
+            { userIsLoading && <CircularProgress size={ 24 }/> }
+            <Box sx={ { maxWidth: 400, mx: "auto", mt: 4 } }>
+                <Typography variant="h5" gutterBottom>
+                    Account Settings
                 </Typography>
-                <TextField
-                    label="Current Password"
-                    type="password"
-                    fullWidth
-                    margin="normal"
-                    value={ currentPassword }
-                    onChange={ (e) => setCurrentPassword(e.target.value) }
-                    required
-                />
-                <TextField
-                    label="New Password"
-                    type="password"
-                    fullWidth
-                    margin="normal"
-                    value={ newPassword }
-                    onChange={ (e) => setNewPassword(e.target.value) }
-                    required
-                />
-                <TextField
-                    label="Confirm New Password"
-                    type="password"
-                    fullWidth
-                    margin="normal"
-                    value={ newPasswordConfirmation }
-                    onChange={ (e) => setNewPasswordConfirmation(e.target.value) }
-                    required
-                />
-                <Button
-                    variant="contained"
-                    color="success"
-                    fullWidth
-                    onClick={ handleUpdatePassword }
-                    disabled={ appIsLoading }
-                >
-                    { appIsLoading ? <CircularProgress size={ 24 }/> : "Update Password" }
-                </Button>
-            </Box>
 
-            <Box component="section">
-                <Typography variant="h6" gutterBottom>
-                    Delete Account
-                </Typography>
-                <TextField
-                    label="Email"
-                    type="email"
-                    fullWidth
-                    margin="normal"
-                    value={ userEmail }
-                    disabled
-                />
-                <TextField
-                    label="Current Password"
-                    type="password"
-                    fullWidth
-                    margin="normal"
-                    value={ deletePassword }
-                    onChange={ (e) => setDeletePassword(e.target.value) }
-                    required
-                />
-                <Button
-                    variant="contained"
-                    color="error"
-                    fullWidth
-                    onClick={ handleDeleteAccount }
-                    disabled={ appIsLoading }
-                >
-                    { appIsLoading ? <CircularProgress size={ 24 }/> : "Delete Account" }
-                </Button>
+                <Box component="section" sx={ { mb: 4 } }>
+                    <Typography variant="h6" gutterBottom>
+                        Change Password
+                    </Typography>
+                    <TextField
+                        label="Current Password"
+                        type="password"
+                        margin="normal"
+                        value={ currentPassword }
+                        fullWidth
+                        required
+                        onChange={ (e) => setCurrentPassword(e.target.value) }
+                    />
+                    <TextField
+                        label="New Password"
+                        type="password"
+                        margin="normal"
+                        value={ newPassword }
+                        fullWidth
+                        required
+                        onChange={ (e) => setNewPassword(e.target.value) }
+                    />
+                    <TextField
+                        label="Confirm New Password"
+                        type="password"
+                        margin="normal"
+                        value={ newPasswordConfirmation }
+                        fullWidth
+                        required
+                        onChange={ (e) => setNewPasswordConfirmation(e.target.value) }
+                    />
+                    <Button
+                        variant="contained"
+                        color="success"
+                        fullWidth
+                        onClick={ handleUpdatePassword }
+                        disabled={ userIsLoading }
+                    >
+                        Update Password
+                    </Button>
+                </Box>
+
+                <Box component="section">
+                    <Typography variant="h6" gutterBottom>
+                        Delete Account
+                    </Typography>
+                    <TextField
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        margin="normal"
+                        value={ userEmail }
+                        disabled
+                    />
+                    <TextField
+                        label="Current Password"
+                        type="password"
+                        margin="normal"
+                        fullWidth
+                        required
+                        value={ deletePassword }
+                        onChange={ (e) => setDeletePassword(e.target.value) }
+                    />
+                    <Button
+                        variant="contained"
+                        color="error"
+                        fullWidth
+                        disabled={ userIsLoading }
+                        onClick={ handleDeleteAccount }
+                    >
+                        Delete Account
+                    </Button>
+                </Box>
             </Box>
-        </Box>
+        </>
     );
 };
 

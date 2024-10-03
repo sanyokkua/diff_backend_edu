@@ -5,6 +5,15 @@ import TaskCreatePage                                                           
 import TaskEditPage                                                                  from "../page/TaskEditPage";
 
 
+/**
+ * BrowserRouter configuration.
+ *
+ * This module sets up the routing for the application using React Router. It defines the routes and their corresponding components,
+ * including public and private routes, as well as error handling.
+ *
+ * @module BrowserRouter
+ */
+
 const BrowserRouter = createBrowserRouter(
     [
         {
@@ -78,6 +87,7 @@ const BrowserRouter = createBrowserRouter(
                 }
             ]
         }
-    ]);
+    ]
+);
 
 export default BrowserRouter;

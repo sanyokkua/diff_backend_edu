@@ -1,40 +1,82 @@
-import { createAsyncThunk }                          from "@reduxjs/toolkit";
-import { AuthClient, UserCreationDTO, UserLoginDto } from "../../api";
-import { parseErrorMessage }                         from "../../api/client/Utils";
-import { AxiosClient, LogLevel }                     from "../../config";
+import { createAsyncThunk }                                                                   from "@reduxjs/toolkit";
+import { AuthClient, parseErrorMessage, ResponseDto, UserCreationDTO, UserDto, UserLoginDto } from "../../api";
+import { AxiosClient, LogLevel }                                                              from "../../config";
 
 
-const log = LogLevel.getLogger("AuthThunks");
+const logger = LogLevel.getLogger("AuthThunks");
 
+/**
+ * Checks if the response is a valid authentication response.
+ * @function isValidAuthResponse
+ * @param {ResponseDto<UserDto> | undefined | null} response - The response to check.
+ * @returns {response is ResponseDto<UserDto>} - True if the response is valid, false otherwise.
+ */
+const isValidAuthResponse = (response: ResponseDto<UserDto> | undefined | null): response is ResponseDto<UserDto> => {
+    return !!(response && response.data && response.data.userId && response.data.email && response.data.jwtToken);
+};
+
+/**
+ * Thunk for logging in a user.
+ * @function loginUser
+ * @param {UserLoginDto} loginData - The login data.
+ * @param {Object} thunkAPI - The thunk API object.
+ * @param {Function} thunkAPI.rejectWithValue - Function to reject with a value.
+ * @returns {Promise<UserDto | string>} - The logged-in user data or an error message.
+ */
 export const loginUser = createAsyncThunk(
-    "globals/loginUser",
-    async (loginRequest: UserLoginDto, { rejectWithValue }) => {
-        log.debug(`Attempting to log in user with email: ${ loginRequest.email }`);
-        const client = new AuthClient(AxiosClient);
+    "auth/loginUser",
+    async (loginData: UserLoginDto, { rejectWithValue }) => {
+        logger.debug(`Login attempt for email: ${ loginData.email }`);
+        const authClient = new AuthClient(AxiosClient);
+
         try {
-            const response = await client.loginUser(loginRequest);
-            log.info(`Successfully logged in user with email: ${ loginRequest.email }`);
-            return response;
+            // Let TypeScript infer the type of the response
+            const response = await authClient.loginUser(loginData);
+
+            if (!isValidAuthResponse(response)) {
+                const validationError = "Invalid response structure from login API.";
+                logger.warn(`Login failed for email: ${ loginData.email } - ${ validationError }`);
+                return rejectWithValue(validationError);
+            }
+
+            logger.info(`Login successful for user: ${ response.data.email }`);
+            return response.data;
         } catch (error: unknown) {
-            const errorMessage = parseErrorMessage(error, "Failed to login");
-            log.error(`Error logging in user with email: ${ loginRequest.email } - ${ errorMessage }`);
+            const errorMessage = parseErrorMessage(error, "Login failed.");
+            logger.error(`Login error for email: ${ loginData.email } - ${ errorMessage }`);
             return rejectWithValue(errorMessage);
         }
     }
 );
 
+/**
+ * Thunk for registering a user.
+ * @function registerUser
+ * @param {UserCreationDTO} registrationData - The registration data.
+ * @param {Object} thunkAPI - The thunk API object.
+ * @param {Function} thunkAPI.rejectWithValue - Function to reject with a value.
+ * @returns {Promise<UserDto | string>} - The registered user data or an error message.
+ */
 export const registerUser = createAsyncThunk(
-    "globals/registerUser",
-    async (registerRequest: UserCreationDTO, { rejectWithValue }) => {
-        log.debug(`Attempting to register user with email: ${ registerRequest.email }`);
-        const client = new AuthClient(AxiosClient);
+    "auth/registerUser",
+    async (registrationData: UserCreationDTO, { rejectWithValue }) => {
+        logger.debug(`Registration attempt for email: ${ registrationData.email }`);
+        const authClient = new AuthClient(AxiosClient);
+
         try {
-            const response = await client.registerUser(registerRequest);
-            log.info(`Successfully registered user with email: ${ registerRequest.email }`);
-            return response;
+            const response = await authClient.registerUser(registrationData);
+
+            if (!isValidAuthResponse(response)) {
+                const validationError = "Invalid response structure from registration API.";
+                logger.warn(`Registration failed for email: ${ registrationData.email } - ${ validationError }`);
+                return rejectWithValue(validationError);
+            }
+
+            logger.info(`Registration successful for user: ${ response.data.email }`);
+            return response.data;
         } catch (error: unknown) {
-            const errorMessage = parseErrorMessage(error, "Failed to Register");
-            log.error(`Error registering user with email: ${ registerRequest.email } - ${ errorMessage }`);
+            const errorMessage = parseErrorMessage(error, "Registration failed.");
+            logger.error(`Registration error for email: ${ registrationData.email } - ${ errorMessage }`);
             return rejectWithValue(errorMessage);
         }
     }

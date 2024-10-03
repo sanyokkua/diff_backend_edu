@@ -3,18 +3,30 @@ import { createRoot }              from "react-dom/client";
 import { Provider }                from "react-redux";
 import { RouterProvider }          from "react-router-dom";
 import { AppReduxStore, LogLevel } from "./core";
+import { BrowserRouter }           from "./react";
 
-import { BrowserRouter } from "./react";
 
+const logger = LogLevel.getLogger("AppRoot");
 
-const log = LogLevel.getLogger("AppRoot");
-const rootElement = document.getElementById("root");
+/**
+ * The root element of the application where the React app will be rendered.
+ *
+ * @type {HTMLElement | null}
+ */
+const rootElement: HTMLElement | null = document.getElementById("root");
+
 if (!rootElement) {
-    log.warn("Failed to load root element");
+    logger.warn("Failed to load root element");
     throw new Error("Root element not found. Please ensure there is an element with id \"root\" in your HTML.");
 }
 
-log.debug("Will be rendered React App");
+logger.debug("Will be rendered React App");
+
+/**
+ * Renders the React application into the root element.
+ *
+ * @function
+ */
 createRoot(rootElement).render(
     <StrictMode>
         <Provider store={ AppReduxStore }>

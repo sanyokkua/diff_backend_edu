@@ -4,12 +4,19 @@ import { AppStore }              from "./ReduxStore";
 
 const log = LogLevel.getLogger("StoreAxiosConfig");
 
-export const configureAxiosWithReduxStore = (reduxStore: AppStore) => {
+/**
+ * Configures Axios with the Redux store to include the JWT token in requests.
+ * @function configureAxiosWithReduxStore
+ * @param {AppStore} reduxStore - The Redux store instance.
+ * @returns {void}
+ */
+export const configureAxiosWithReduxStore = (reduxStore: AppStore): void => {
     log.debug("configureAxiosWithReduxStore");
+
     AxiosClient.interceptors.request.use(
         async request => {
             const state = reduxStore.getState();
-            const accessToken = state.globals.userJwtToken;
+            const accessToken = state.users.userJwtToken;
 
             if (accessToken && request.headers) {
                 request.headers.Authorization = `Bearer ${ accessToken }`;

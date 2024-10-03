@@ -1,33 +1,52 @@
-import { Box, Typography }         from "@mui/material";
-import { FC, useEffect, useState } from "react";
-import { useNavigate }             from "react-router-dom";
+import { Box, Typography }              from "@mui/material";
+import { FC, JSX, useEffect, useState } from "react";
+import { useNavigate }                  from "react-router-dom";
 import {
     createTask,
-    CreateTaskRequest,
+    CreateTaskPayload,
+    LogLevel,
     parseErrorMessage,
-    setAppBarHeader,
+    setHeaderTitle,
     TaskDto,
     useAppDispatch,
     useAppSelector
-}                                  from "../../core";
-import TaskForm                    from "../component/TaskForm";
+}                                       from "../../core";
+import { TaskForm }                     from "../component";
 
 
-const TaskCreatePage: FC = () => {
+const logger = LogLevel.getLogger("TaskCreatePage");
+
+/**
+ * TaskCreatePage component.
+ *
+ * This component is responsible for rendering the task creation page and handling the creation of new tasks.
+ * It sets the header title to "Create Task" and manages the form submission process.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered task creation page component.
+ */
+const TaskCreatePage: FC = (): JSX.Element => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const [errorMsg, setErrorMsg] = useState<string>("");
-    const { userId } = useAppSelector((state) => state.globals);
+    const { userId } = useAppSelector((state) => state.users);
     const task: TaskDto = { taskId: 0, name: "", description: "", userId: userId };
 
     useEffect(() => {
-        dispatch(setAppBarHeader("Create Task"));
+        // Set the header title to "Create Task" when the component mounts.
+        dispatch(setHeaderTitle("Create Task"));
     }, [dispatch]);
 
+    /**
+     * Handles the form submission.
+     *
+     * @param {TaskDto} data - The form data containing task details.
+     */
     const onSubmit = async (data: TaskDto) => {
-        const updateReq: CreateTaskRequest = {
+        logger.debug("Submit", data);
+        const updateReq: CreateTaskPayload = {
             userId: userId,
-            taskCreationDTO: {
+            taskData: {
                 name: data.name,
                 description: data.description
             }
@@ -36,32 +55,26 @@ const TaskCreatePage: FC = () => {
             await dispatch(createTask(updateReq)).unwrap();
             navigate("/dashboard");
         } catch (e) {
-            const errMsg = parseErrorMessage(e);
+            const errMsg = parseErrorMessage(e, "Failed to create task");
             setErrorMsg(errMsg);
         }
     };
 
+    /**
+     * Handles the cancel action.
+     */
     const onCancel = () => {
         navigate("/dashboard");
     };
 
-    return <Box
-        sx={ {
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "80%",
-            margin: "0 auto",
-            padding: 2
-        } }
-    >
-        <Typography variant="h4" gutterBottom>
-            Create new task
-        </Typography>
-
-        <TaskForm task={ task } onSave={ onSubmit } onCancel={ onCancel } error={ errorMsg }/>
-    </Box>;
+    return (
+        <Box>
+            <Typography variant="h4" gutterBottom>
+                Create new task
+            </Typography>
+            <TaskForm task={ task } onSave={ onSubmit } onCancel={ onCancel } errorMessage={ errorMsg }/>
+        </Box>
+    );
 };
 
 export default TaskCreatePage;

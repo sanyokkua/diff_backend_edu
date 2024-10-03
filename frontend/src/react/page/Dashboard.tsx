@@ -1,11 +1,13 @@
 import { Box, Button, CircularProgress } from "@mui/material";
-import { FC, useEffect, useState }       from "react";
+import { FC, JSX, useEffect, useState }  from "react";
 import { useNavigate }                   from "react-router-dom";
 import {
     deleteTask,
-    DeleteUserTaskRequest,
-    getTasks,
-    setAppBarHeader,
+    DeleteTaskPayload,
+    fetchTasks,
+    LogLevel,
+    setFeedback,
+    setHeaderTitle,
     setTaskDescription,
     setTaskId,
     setTaskName,
@@ -13,27 +15,52 @@ import {
     useAppDispatch,
     useAppSelector
 }                                        from "../../core";
-import ConfirmationDialog                from "../component/ConfirmationDialog";
-import FeedbackSnackbar                  from "../component/FeedbackSnackbar";
-import TasksList                         from "../component/TasksList";
+import { ConfirmationDialog, TasksList } from "../component";
 
 
-const Dashboard: FC = () => {
+const logger = LogLevel.getLogger("Dashboard");
+
+/**
+ * Dashboard component.
+ *
+ * This component is responsible for displaying the user's tasks and providing functionality
+ * to add, edit, and delete tasks. It uses Redux for state management and logs various actions.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered dashboard component.
+ */
+const Dashboard: FC = (): JSX.Element => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const [deleteTaskDto, setDeleteTaskDto] = useState<DeleteUserTaskRequest | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+    const [taskToDelete, setTaskToDelete] = useState<DeleteTaskPayload | null>(null);
 
-    const { userId, tasksList, appIsLoading, appError } = useAppSelector((state) => state.globals);
+    const { tasksList, isTaskLoading, taskError } = useAppSelector((state) => state.tasks);
+    const { userId } = useAppSelector((state) => state.users);
 
     useEffect(() => {
-        dispatch(setAppBarHeader("Dashboard"));
+        // Set the header title to "Dashboard" when the component mounts.
+        dispatch(setHeaderTitle("Dashboard"));
         if (userId) {
-            dispatch(getTasks(userId)); // Fetch tasks on mount
+            // Fetch tasks for the user if userId is available.
+            dispatch(fetchTasks(userId));
         }
     }, [dispatch, userId]);
 
+    useEffect(() => {
+        if (taskError) {
+            // Display feedback and log an error if there is a task error.
+            dispatch(setFeedback({ message: taskError, severity: "error" }));
+            logger.error(`Task error: ${ taskError }`);
+        }
+    }, [dispatch, taskError]);
+
+    /**
+     * Handles the click event on a task.
+     *
+     * @param {TaskDto} task - The task object.
+     */
     const handleTaskClick = (task: TaskDto) => {
         dispatch(setTaskId(task.taskId));
         dispatch(setTaskName(task.name));
@@ -41,63 +68,74 @@ const Dashboard: FC = () => {
         navigate("/dashboard/edit");
     };
 
+    /**
+     * Handles the click event to delete a task.
+     *
+     * @param {TaskDto} task - The task object.
+     */
     const handleDeleteClick = (task: TaskDto) => {
-        const delReq: DeleteUserTaskRequest = {
-            userId: userId,
-            taskId: task.taskId
-        };
-        setDeleteTaskDto(delReq);
-        setOpenDialog(true);
+        setTaskToDelete({ userId, taskId: task.taskId });
+        setIsDialogOpen(true);
     };
 
+    /**
+     * Handles the deletion of a task.
+     */
     const handleDelete = async () => {
-        if (deleteTaskDto) {
-            await dispatch(deleteTask(deleteTaskDto));
-            await dispatch(getTasks(userId)); // Re-Fetch tasks after delete
+        if (taskToDelete) {
+            try {
+                await dispatch(deleteTask(taskToDelete));
+                await dispatch(fetchTasks(userId));
+                logger.info(`Task deleted: ${ taskToDelete.taskId }`);
+            } catch (error) {
+                logger.error(`Failed to delete task: ${ error }`);
+                dispatch(setFeedback({ message: "Failed to delete task", severity: "error" }));
+            }
         }
-        resetDelete();
+        resetDeleteState();
     };
 
-    const resetDelete = () => {
-        setOpenDialog(false);
-        setDeleteTaskDto(null);
+    /**
+     * Resets the state related to task deletion.
+     */
+    const resetDeleteState = () => {
+        setIsDialogOpen(false);
+        setTaskToDelete(null);
     };
 
+    /**
+     * Handles the click event to add a new task.
+     */
     const handleAddTaskClick = () => {
         navigate("/dashboard/new");
     };
 
+    logger.debug("Dashboard render");
     return (
         <>
             <ConfirmationDialog
                 title="Delete Task"
-                content="Are you sure you want to delete this task? This action cannot be undone."
-                open={ openDialog }
+                message="Are you sure you want to delete this task? This action cannot be undone."
+                isOpen={ isDialogOpen }
                 onConfirm={ handleDelete }
-                onCancel={ resetDelete }
-                onClose={ resetDelete }
+                onCancel={ resetDeleteState }
+                onClose={ resetDeleteState }
             />
-            { appIsLoading && <CircularProgress/> }
-            { !appIsLoading && (
-                <Box display="flex" justifyContent="center" alignItems="center" width="80%" mx="auto" my={ 2 }>
-                    <Box width="100%">
-                        <Box display="flex" justifyContent="center" my={ 2 }>
-                            <Button variant="contained" color="success" onClick={ handleAddTaskClick }>
-                                Add Task
-                            </Button>
-                        </Box>
-                        <TasksList tasks={ tasksList } onTaskSelected={ handleTaskClick }
-                                   onTaskDeleted={ handleDeleteClick }/>
-                    </Box>
-                </Box>
-            ) }
-            { appError && (
-                <FeedbackSnackbar
-                    feedbackMessage={ { message: appError, severity: "error" } }
-                    onClose={ () => {
-                    } }
-                />
-            ) }
+            { isTaskLoading ? (
+                <CircularProgress/>
+            ) : (
+                  <Box display="flex" justifyContent="center" alignItems="center" width="80%" mx="auto" my={ 2 }>
+                      <Box width="100%">
+                          <Box display="flex" justifyContent="center" my={ 2 }>
+                              <Button variant="contained" color="success" onClick={ handleAddTaskClick }>
+                                  Add Task
+                              </Button>
+                          </Box>
+                          <TasksList tasks={ tasksList } onTaskSelect={ handleTaskClick }
+                                     onTaskDelete={ handleDeleteClick }/>
+                      </Box>
+                  </Box>
+              ) }
         </>
     );
 };

@@ -4,7 +4,7 @@ import { FC }       from "react";
 import { LogLevel } from "../../core";
 
 // Initialize logger for the FeedbackSnackbar component
-const log = LogLevel.getLogger("FeedbackSnackbar");
+const logger = LogLevel.getLogger("FeedbackSnackbar");
 
 /**
  * FeedbackType - Defines the structure for feedback messages.
@@ -37,11 +37,11 @@ interface FeedbackSnackbarProps {
 const FeedbackSnackbar: FC<FeedbackSnackbarProps> = ({ feedbackMessage, onClose }) => {
     // Check if there's a feedback message to display
     if (!feedbackMessage) {
-        log.debug("No feedback message to display."); // Debug log for when no feedback message is available
+        logger.debug("No feedback message to display."); // Debug log for when no feedback message is available
         return <></>; // Return nothing if no message is present
     }
 
-    log.info(`Displaying ${ feedbackMessage.severity } feedback: "${ feedbackMessage.message }"`); // Log the feedback message and its severity
+    logger.info(`Displaying ${ feedbackMessage.severity } feedback: "${ feedbackMessage.message }"`); // Log the feedback message and its severity
 
     // Render the Snackbar with the feedback message and severity
     return (

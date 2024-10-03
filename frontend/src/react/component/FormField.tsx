@@ -1,9 +1,9 @@
 import { FormControl, TextField } from "@mui/material";
-import { ChangeEvent, FC }        from "react";
+import { ChangeEvent, FC, JSX }   from "react";
 import { LogLevel }               from "../../core";
 
 // Initialize logger for the FormField component
-const log = LogLevel.getLogger("FormField");
+const logger = LogLevel.getLogger("FormField");
 
 /**
  * FormFieldProps - Defines the properties for the FormField component.
@@ -35,8 +35,8 @@ interface FormFieldProps {
  * @param error - Error message (if any) to display for validation failures.
  * @param onChange - Event handler for field value changes.
  */
-const FormField: FC<FormFieldProps> = ({ fieldName, label, type, value, error, onChange }) => {
-    log.debug(`Rendering FormField: ${ fieldName }, type: ${ type }`); // Debug log for rendering the field
+const FormField: FC<FormFieldProps> = ({ fieldName, label, type, value, error, onChange }): JSX.Element => {
+    logger.debug(`Rendering FormField: ${ fieldName }, type: ${ type }`); // Debug log for rendering the field
 
     return (
         <FormControl fullWidth margin="normal">
@@ -46,7 +46,7 @@ const FormField: FC<FormFieldProps> = ({ fieldName, label, type, value, error, o
                 type={ type }
                 value={ value }
                 onChange={ (e) => {
-                    log.debug(`Field "${ fieldName }" changed. New value length: ${ e.target.value.length }`); // Log value length change (not actual value for privacy)
+                    logger.debug(`Field "${ fieldName }" changed. New value length: ${ e.target.value.length }`); // Log value length change (not actual value for privacy)
                     onChange(e); // Trigger parent onChange handler
                 } }
                 error={ !!error }

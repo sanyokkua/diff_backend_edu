@@ -1,19 +1,36 @@
-import { CssBaseline }      from "@mui/material";
-import React, { useEffect } from "react";
-import { useNavigate }      from "react-router-dom";
-import { useAppSelector }   from "./core";
-import { Layout }           from "./react";
+import { CssBaseline }              from "@mui/material";
+import { FC, JSX, useEffect }       from "react";
+import { useNavigate }              from "react-router-dom";
+import { LogLevel, useAppSelector } from "./core";
+import { Layout }                   from "./react";
 
 
-const App: React.FC = (): React.JSX.Element => {
+const logger = LogLevel.getLogger("App");
+
+/**
+ * The main App component that sets up the application layout and handles user authentication state.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered App component.
+ */
+const App: FC = (): JSX.Element => {
     const navigate = useNavigate();
-    const { userIsLoggedIn } = useAppSelector((state) => state.globals);
+    const isUserLoggedIn = useAppSelector((state) => state.users.userIsLoggedIn);
 
+    /**
+     * useEffect hook to check if the user is logged in and redirect to the login page if not.
+     *
+     * @param {boolean} isUserLoggedIn - Indicates if the user is logged in.
+     * @param {Function} navigate - Function to navigate to different routes.
+     */
     useEffect(() => {
-        if (!userIsLoggedIn) {
+        if (!isUserLoggedIn) {
+            logger.info("User is not logged in, redirecting to login page.");
             navigate("/login");
         }
-    }, [navigate, userIsLoggedIn]);
+    }, [isUserLoggedIn, navigate]);
+
+    logger.debug("Rendering App component");
 
     return (
         <>

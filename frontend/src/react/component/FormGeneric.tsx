@@ -1,12 +1,11 @@
-import { Box, Button, Typography }                                 from "@mui/material";
-import { ChangeEvent, FC, FormEvent, useState }                    from "react";
-import { Link }                                                    from "react-router-dom";
-import { LoginSchema, LogLevel, RegistrationSchema, validateForm } from "../../core";
-import FeedbackSnackbar, { FeedbackType }                          from "./FeedbackSnackbar";
-import FormField                                                   from "./FormField";
+import { Box, Button, Typography }                                                              from "@mui/material";
+import { ChangeEvent, FC, FormEvent, JSX, useState }                                            from "react";
+import { Link }                                                                                 from "react-router-dom";
+import { LoginSchema, LogLevel, RegistrationSchema, setFeedback, useAppDispatch, validateForm } from "../../core";
+import FormField                                                                                from "./FormField";
 
 
-const log = LogLevel.getLogger("FormGeneric");
+const logger = LogLevel.getLogger("FormGeneric");
 
 // Types for form data response and form types
 export type FormResponse = {
@@ -58,9 +57,9 @@ interface FormGenericProps {
  * This component renders either a Login or Registration form based on the formType prop.
  * It handles form state, validation, and submission.
  */
-const FormGeneric: FC<FormGenericProps> = ({ formType, onSubmit }) => {
-    log.info(`Rendering FormGeneric component for ${ formType } form.`); // Log rendering of form component
-
+const FormGeneric: FC<FormGenericProps> = ({ formType, onSubmit }): JSX.Element => {
+    logger.info(`Rendering FormGeneric component for ${ formType } form.`); // Log rendering of form component
+    const dispatch = useAppDispatch();
     // Select appropriate schema (Login or Registration) for validation
     const currentSchema = formType === "Login" ? LoginSchema : RegistrationSchema;
 
@@ -70,7 +69,6 @@ const FormGeneric: FC<FormGenericProps> = ({ formType, onSubmit }) => {
     // State variables to manage form data, validation errors, and feedback messages
     const [formData, setFormData] = useState<FormResponse>(initialFormValues); // Input values
     const [errors, setErrors] = useState<Partial<FormResponse>>({});           // Validation errors
-    const [feedbackMessage, setFeedbackMessage] = useState<FeedbackType | null>(null); // Feedback snackbar message
 
     /**
      * Handle input field changes.
@@ -78,7 +76,7 @@ const FormGeneric: FC<FormGenericProps> = ({ formType, onSubmit }) => {
      */
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        log.debug(`Input changed: ${ name }, value length: ${ value.length }`); // Log input changes without logging actual value
+        logger.debug(`Input changed: ${ name }, value length: ${ value.length }`); // Log input changes without logging actual value
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -88,39 +86,32 @@ const FormGeneric: FC<FormGenericProps> = ({ formType, onSubmit }) => {
      */
     const handleFormSubmit = async (e: FormEvent) => {
         e.preventDefault(); // Prevent default form submission behavior (page reload)
-        log.debug("Form submission started.");
+        logger.debug("Form submission started.");
 
         // Validate form data using the appropriate schema
         const isValid = await validateForm(formData, currentSchema, setErrors);
         if (isValid) {
-            log.info("Form validation passed.");
+            logger.info("Form validation passed.");
             // If the form is valid, try submitting the form data
             try {
-                log.debug("Attempting to submit form data.");
+                logger.debug("Attempting to submit form data.");
                 await onSubmit(formData); // Trigger form submission logic passed as a prop
-                setFeedbackMessage({ message: "Form submitted successfully", severity: "success" }); // Show success feedback
-                log.info("Form submitted successfully.");
+                logger.info("Form submitted successfully.");
             } catch (error) {
-                log.error("Form submission failed.", error); // Log error details
+                logger.error("Form submission failed.", error); // Log error details
                 let errMsg: string = "Submission failed. Please try again later.";
                 if (typeof error === "string") {
                     errMsg = error;
                 } else if (error instanceof Error) {
                     errMsg = error.message;
                 }
-                setFeedbackMessage({ message: errMsg, severity: "error" });
+                dispatch(setFeedback({ message: errMsg, severity: "error" }));
             }
         } else {
-            log.warn("Form validation failed.", { errors }); // Log validation errors
-            setFeedbackMessage({ message: "Form validation failed", severity: "error" });
+            logger.warn("Form validation failed.", { errors }); // Log validation errors
+            dispatch(setFeedback({ message: "Form validation failed", severity: "error" }));
         }
     };
-
-    /**
-     * Handle closing of the feedback snackbar.
-     * This clears the feedbackMessage state, closing the snackbar.
-     */
-    const handleCloseSnackbar = () => setFeedbackMessage(null);
 
     return (
         <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh"
@@ -172,9 +163,6 @@ const FormGeneric: FC<FormGenericProps> = ({ formType, onSubmit }) => {
                     { altText }
                 </Button>
             </Box>
-
-            {/* Feedback snackbar for showing success/error messages */ }
-            <FeedbackSnackbar feedbackMessage={ feedbackMessage } onClose={ handleCloseSnackbar }/>
         </Box>
     );
 };
