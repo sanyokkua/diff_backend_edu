@@ -2,6 +2,36 @@
 
 A comparative analysis of backend implementations for a Task Management System using various technologies.
 
+<!-- TOC -->
+
+* [diff_backend_edu](#diff_backend_edu)
+  * [Project Overview](#project-overview)
+    * [Task Management System: Backend Comparison](#task-management-system-backend-comparison)
+    * [Backend Implementations](#backend-implementations)
+  * [Skeleton Project Setup](#skeleton-project-setup)
+    * [Java + Spring Boot](#java--spring-boot)
+    * [Node.js + Express.js](#nodejs--expressjs)
+    * [Python + Django](#python--django)
+    * [GoLang + Gin](#golang--gin)
+  * [Common API Description for All Backend Services](#common-api-description-for-all-backend-services)
+    * [User Management REST Controller](#user-management-rest-controller)
+      * [Example Request and Response Payloads](#example-request-and-response-payloads)
+    * [Task Management REST Controller](#task-management-rest-controller)
+      * [Example Request and Response Payloads](#example-request-and-response-payloads-1)
+    * [Authentication REST Controller](#authentication-rest-controller)
+      * [Example Request and Response Payloads](#example-request-and-response-payloads-2)
+  * [Frontend Screens of the App](#frontend-screens-of-the-app)
+    * [Login Screen](#login-screen)
+    * [Registration Screen](#registration-screen)
+    * [Dashboard Screen](#dashboard-screen)
+    * [Create Task Screen](#create-task-screen)
+    * [Dashboard After Creating Several Tasks](#dashboard-after-creating-several-tasks)
+    * [Update Task Screen](#update-task-screen)
+    * [Delete Task Confirmation on the Dashboard](#delete-task-confirmation-on-the-dashboard)
+    * [Profile Screen](#profile-screen)
+
+<!-- TOC -->
+
 ## Project Overview
 
 ### Task Management System: Backend Comparison
@@ -324,3 +354,38 @@ The following API endpoints should be implemented via different technologies:
   ```
 
 ---
+
+## Frontend Screens of the App
+
+### Login Screen
+
+![Login Screen](docs/01.png)
+
+### Registration Screen
+
+![Registration Screen](docs/02.png)
+
+### Dashboard Screen
+
+![Dashboard Screen](docs/03.png)
+
+### Create Task Screen
+
+![Create Task Screen](docs/04.png)
+
+### Dashboard After Creating Several Tasks
+
+![Dashboard with Multiple Tasks](docs/05.png)
+
+### Update Task Screen
+
+![Update Task Screen](docs/06.png)
+
+### Delete Task Confirmation on the Dashboard
+
+![Delete Task Confirmation](docs/07.png)
+
+### Profile Screen
+
+To access the profile, click on the email address located on the right side of the application toolbar.
+![Profile Screen](docs/08.png)

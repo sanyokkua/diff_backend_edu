@@ -1,36 +1,43 @@
-import { useState } from "react";
-import reactLogo    from "./assets/react.svg";
-import viteLogo     from "/vite.svg";
-import "./App.css";
+import { CssBaseline }              from "@mui/material";
+import { FC, JSX, useEffect }       from "react";
+import { useNavigate }              from "react-router-dom";
+import { LogLevel, useAppSelector } from "./core";
+import { Layout }                   from "./react";
 
 
-function App() {
-    const [count, setCount] = useState(0);
+const logger = LogLevel.getLogger("App");
+
+/**
+ * The main App component that sets up the application layout and handles user authentication state.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered App component.
+ */
+const App: FC = (): JSX.Element => {
+    const navigate = useNavigate();
+    const isUserLoggedIn = useAppSelector((state) => state.users.userIsLoggedIn);
+
+    /**
+     * useEffect hook to check if the user is logged in and redirect to the login page if not.
+     *
+     * @param {boolean} isUserLoggedIn - Indicates if the user is logged in.
+     * @param {Function} navigate - Function to navigate to different routes.
+     */
+    useEffect(() => {
+        if (!isUserLoggedIn) {
+            logger.info("User is not logged in, redirecting to login page.");
+            navigate("/login");
+        }
+    }, [isUserLoggedIn, navigate]);
+
+    logger.debug("Rendering App component");
 
     return (
         <>
-            <div>
-                <a href="https://vitejs.dev" target="_blank">
-                    <img src={ viteLogo } className="logo" alt="Vite logo"/>
-                </a>
-                <a href="https://react.dev" target="_blank">
-                    <img src={ reactLogo } className="logo react" alt="React logo"/>
-                </a>
-            </div>
-            <h1>Vite + React</h1>
-            <div className="card">
-                <button onClick={ () => setCount((count) => count + 1) }>
-                    count is { count }
-                </button>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-            </div>
-            <p className="read-the-docs">
-                Click on the Vite and React logos to learn more
-            </p>
+            <CssBaseline/>
+            <Layout/>
         </>
     );
-}
+};
 
 export default App;
