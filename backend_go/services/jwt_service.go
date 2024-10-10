@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const jwtExpMinutes = 15 // JWT expiration time in minutes
+const JwtExpMinutes = 15 // JWT expiration time in minutes
 
 // jwtService implements the JwtService interface and provides methods for managing JWT tokens.
 type jwtService struct {
@@ -121,7 +121,7 @@ func (s *jwtService) GenerateJwtToken(username string) (string, error) {
 	log.Debug().Str("username", username).Msg("Generating JWT token")
 
 	now := time.Now()
-	exp := now.Add(time.Minute * jwtExpMinutes) // Set token expiration time
+	exp := now.Add(time.Minute * JwtExpMinutes) // Set token expiration time
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": username,   // Subject of the token (the username)

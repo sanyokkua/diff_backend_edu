@@ -3,8 +3,10 @@ package repositories
 import (
 	"github.com/rs/zerolog/log"
 	"go_backend/api"
+	"go_backend/apperrors"
 	"go_backend/models"
 	"gorm.io/gorm"
+	"strings"
 )
 
 // userRepository is a private struct that implements the UserRepository interface.
@@ -35,6 +37,9 @@ func NewUserRepository(db *gorm.DB) api.UserRepository {
 //   - *models.User: A pointer to the created user.
 //   - error: An error if the creation fails.
 func (r *userRepository) CreateUser(user *models.User) (*models.User, error) {
+	if user == nil {
+		return nil, apperrors.NewGenericError("Passed User model is nil")
+	}
 	log.Debug().Str("email", user.Email).Msg("Creating user")
 	if err := r.db.Create(user).Error; err != nil {
 		log.Error().Err(err).Str("email", user.Email).Msg("Error creating user")
@@ -53,6 +58,9 @@ func (r *userRepository) CreateUser(user *models.User) (*models.User, error) {
 //   - *models.User: A pointer to the user with the specified ID.
 //   - error: An error if the retrieval fails.
 func (r *userRepository) GetUserByID(id int64) (*models.User, error) {
+	if id <= 0 {
+		return nil, apperrors.NewGenericError("Passed id is invalid")
+	}
 	log.Debug().Int64("id", id).Msg("Retrieving user by ID")
 	var user models.User
 	if err := r.db.First(&user, id).Error; err != nil {
@@ -72,6 +80,9 @@ func (r *userRepository) GetUserByID(id int64) (*models.User, error) {
 //   - *models.User: A pointer to the updated user.
 //   - error: An error if the update fails.
 func (r *userRepository) UpdateUser(user *models.User) (*models.User, error) {
+	if user == nil {
+		return nil, apperrors.NewGenericError("Passed User model is nil")
+	}
 	log.Debug().Str("email", user.Email).Msg("Updating user")
 	if err := r.db.Save(user).Error; err != nil {
 		log.Error().Err(err).Str("email", user.Email).Msg("Error updating user")
@@ -89,6 +100,9 @@ func (r *userRepository) UpdateUser(user *models.User) (*models.User, error) {
 // Returns:
 //   - error: An error if the deletion fails.
 func (r *userRepository) DeleteUser(id int64) error {
+	if id <= 0 {
+		return apperrors.NewGenericError("Passed id is invalid")
+	}
 	log.Debug().Int64("id", id).Msg("Deleting user")
 	if err := r.db.Delete(&models.User{}, id).Error; err != nil {
 		log.Error().Err(err).Int64("id", id).Msg("Error deleting user")
@@ -107,6 +121,9 @@ func (r *userRepository) DeleteUser(id int64) error {
 //   - *models.User: A pointer to the user with the specified email address.
 //   - error: An error if the retrieval fails.
 func (r *userRepository) GetUserByEmail(email string) (*models.User, error) {
+	if email == "" || len(strings.TrimSpace(email)) == 0 {
+		return nil, apperrors.NewGenericError("Email can't be empty string")
+	}
 	log.Debug().Str("email", email).Msg("Retrieving user by email")
 	var user models.User
 	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {

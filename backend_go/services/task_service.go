@@ -67,8 +67,14 @@ func (s *taskService) CreateTask(userId int64, taskCreationDTO *dto.TaskCreation
 		UserID:      user.UserID,
 	}
 
+	savedTask, err := s.taskRepo.CreateTask(newTask)
+	if err != nil {
+		log.Error().Err(err).Int64("taskId", newTask.TaskID).Msg("Error saving task")
+		return nil, err
+	}
+
 	// Save the task
-	return s.saveTask(newTask)
+	return s.saveTask(savedTask)
 }
 
 // UpdateTask updates an existing task for a user.
@@ -100,8 +106,14 @@ func (s *taskService) UpdateTask(userId, taskId int64, taskUpdateDTO *dto.TaskUp
 	task.Name = taskUpdateDTO.Name
 	task.Description = taskUpdateDTO.Description
 
+	savedTask, err := s.taskRepo.UpdateTask(task)
+	if err != nil {
+		log.Error().Err(err).Int64("taskId", task.TaskID).Msg("Error saving task")
+		return nil, err
+	}
+
 	// Save updated task
-	return s.saveTask(task)
+	return s.saveTask(savedTask)
 }
 
 // DeleteTask removes a task if it belongs to the specified user.
@@ -253,13 +265,7 @@ func (s *taskService) ensureUniqueTaskName(user *models.User, taskName string) e
 // Returns:
 //   - *dto.TaskDTO: The saved task as a TaskDTO.
 //   - error: An error if saving the task fails.
-func (s *taskService) saveTask(task *models.Task) (*dto.TaskDTO, error) {
-	savedTask, err := s.taskRepo.CreateTask(task)
-	if err != nil {
-		log.Error().Err(err).Int64("taskId", task.TaskID).Msg("Error saving task")
-		return nil, err
-	}
-
+func (s *taskService) saveTask(savedTask *models.Task) (*dto.TaskDTO, error) {
 	log.Info().Int64("taskId", savedTask.TaskID).Str("taskName", savedTask.Name).Msg("Task saved successfully")
 	return s.convertToTaskDTO(savedTask), nil
 }

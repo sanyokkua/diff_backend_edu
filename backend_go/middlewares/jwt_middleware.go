@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"errors"
+	"go_backend/apperrors"
 	"net/http"
 	"strings"
 
@@ -28,7 +28,7 @@ func JWTAuthMiddleware(jwtService api.JwtService, userRepository api.UserReposit
 		if authHeader == "" {
 			log.Warn().Msg("Authorization header is missing")
 			// If the header is missing, return a 401 Unauthorized response
-			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, errors.New("authorization header required"))
+			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, apperrors.NewInsufficientAuthenticationError("authorization header required"))
 			ctx.Abort()
 			return
 		}
@@ -38,7 +38,7 @@ func JWTAuthMiddleware(jwtService api.JwtService, userRepository api.UserReposit
 		if tokenString == "" {
 			log.Warn().Msg("JWT is missing from Authorization header")
 			// If the token is missing, return a 401 Unauthorized response
-			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, errors.New("bearer token required"))
+			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, apperrors.NewInsufficientAuthenticationError("bearer token required"))
 			ctx.Abort()
 			return
 		}
@@ -48,7 +48,7 @@ func JWTAuthMiddleware(jwtService api.JwtService, userRepository api.UserReposit
 		if err != nil {
 			log.Warn().Err(err).Msg("Failed to extract claims from JWT")
 			// If claims extraction fails, return a 401 Unauthorized response
-			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, errors.New("invalid token"))
+			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, apperrors.NewInsufficientAuthenticationError("invalid token"))
 			ctx.Abort()
 			return
 		}
@@ -58,7 +58,7 @@ func JWTAuthMiddleware(jwtService api.JwtService, userRepository api.UserReposit
 		if err != nil {
 			log.Warn().Err(err).Msg("Failed to extract subject from JWT")
 			// If subject extraction fails, return a 401 Unauthorized response
-			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, errors.New("invalid token subject"))
+			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, apperrors.NewInsufficientAuthenticationError("invalid token subject"))
 			ctx.Abort()
 			return
 		}
@@ -67,7 +67,7 @@ func JWTAuthMiddleware(jwtService api.JwtService, userRepository api.UserReposit
 		if !jwtService.ValidateToken(tokenString, subject) {
 			log.Warn().Str("subject", subject).Msg("Invalid or expired JWT")
 			// If the token is invalid or expired, return a 401 Unauthorized response
-			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, errors.New("invalid or expired token"))
+			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, apperrors.NewInsufficientAuthenticationError("invalid or expired token"))
 			ctx.Abort()
 			return
 		}
@@ -77,7 +77,7 @@ func JWTAuthMiddleware(jwtService api.JwtService, userRepository api.UserReposit
 		if err != nil || user == nil {
 			log.Warn().Str("subject", subject).Msg("No user found for subject")
 			// If no user is found, return a 401 Unauthorized response
-			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, errors.New("user not found"))
+			utils.WriteErrorResponse(ctx, http.StatusUnauthorized, apperrors.NewAuthenticationCredentialsNotFoundError("user not found"))
 			ctx.Abort()
 			return
 		}

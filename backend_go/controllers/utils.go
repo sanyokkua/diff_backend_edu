@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"go_backend/apperrors"
 	"go_backend/models"
 	"go_backend/utils"
 	"strconv"
@@ -49,13 +49,13 @@ func getUserFromContext(ctx *gin.Context) (*models.User, error) {
 	currentUser, found := ctx.Get("CurrentUser") // Retrieve current user from context
 	if !found {
 		log.Warn().Msg("User not logged in")
-		return nil, errors.New("user not logged in")
+		return nil, apperrors.NewAuthenticationCredentialsNotFoundError("user not logged in")
 	}
 
 	user, ok := currentUser.(*models.User) // Assert the type of the user
 	if !ok {
 		log.Error().Msg("Failed to convert saved object to user type")
-		return nil, errors.New("cannot convert saved object to user type")
+		return nil, apperrors.NewGenericError("cannot convert saved object to user type")
 	}
 
 	log.Debug().Str("email", user.Email).Msg("User retrieved successfully")

@@ -3,8 +3,10 @@ package repositories
 import (
 	"github.com/rs/zerolog/log"
 	"go_backend/api"
+	"go_backend/apperrors"
 	"go_backend/models"
 	"gorm.io/gorm"
+	"strings"
 )
 
 // taskRepository is a private struct that implements the TaskRepository interface.
@@ -35,6 +37,9 @@ func NewTaskRepository(db *gorm.DB) api.TaskRepository {
 //   - *models.Task: A pointer to the Task retrieved from the database.
 //   - error: An error if the retrieval fails.
 func (r *taskRepository) FindByTaskID(taskID int64) (*models.Task, error) {
+	if taskID <= 0 {
+		return nil, apperrors.NewGenericError("ID is not valid")
+	}
 	return r.findTask("task_id = ?", taskID)
 }
 
@@ -48,6 +53,9 @@ func (r *taskRepository) FindByTaskID(taskID int64) (*models.Task, error) {
 //   - *models.Task: A pointer to the Task retrieved from the database.
 //   - error: An error if the retrieval fails.
 func (r *taskRepository) FindByUserAndName(user *models.User, name string) (*models.Task, error) {
+	if user == nil || len(strings.TrimSpace(name)) == 0 {
+		return nil, apperrors.NewGenericError("Invalid params")
+	}
 	log.Debug().Int64("userId", user.UserID).Str("taskName", name).Msg("Retrieving task by user and name")
 	return r.findTask("user_id = ? AND name = ?", user.UserID, name)
 }
@@ -62,6 +70,9 @@ func (r *taskRepository) FindByUserAndName(user *models.User, name string) (*mod
 //   - *models.Task: A pointer to the Task retrieved from the database.
 //   - error: An error if the retrieval fails.
 func (r *taskRepository) FindByUserAndTaskID(user *models.User, taskID int64) (*models.Task, error) {
+	if user == nil || taskID <= 0 {
+		return nil, apperrors.NewGenericError("Invalid params")
+	}
 	log.Debug().Int64("userId", user.UserID).Int64("taskId", taskID).Msg("Retrieving task by user and task ID")
 	return r.findTask("user_id = ? AND task_id = ?", user.UserID, taskID)
 }
@@ -75,6 +86,9 @@ func (r *taskRepository) FindByUserAndTaskID(user *models.User, taskID int64) (*
 //   - []models.Task: A slice of Task models associated with the user.
 //   - error: An error if the retrieval fails.
 func (r *taskRepository) FindAllByUser(user *models.User) ([]models.Task, error) {
+	if user == nil {
+		return nil, apperrors.NewGenericError("User is nil")
+	}
 	log.Debug().Int64("userId", user.UserID).Msg("Retrieving all tasks for user")
 	var tasks []models.Task
 	if err := r.db.Where("user_id = ?", user.UserID).Find(&tasks).Error; err != nil {
@@ -94,6 +108,9 @@ func (r *taskRepository) FindAllByUser(user *models.User) ([]models.Task, error)
 //   - *models.Task: A pointer to the newly created Task.
 //   - error: An error if the creation fails.
 func (r *taskRepository) CreateTask(task *models.Task) (*models.Task, error) {
+	if task == nil {
+		return nil, apperrors.NewGenericError("Task model is nil")
+	}
 	log.Debug().Str("taskName", task.Name).Int64("userId", task.UserID).Msg("Creating new task")
 	if err := r.db.Create(task).Error; err != nil {
 		log.Error().Err(err).Str("taskName", task.Name).Int64("userId", task.UserID).Msg("Failed to create new task")
@@ -112,6 +129,9 @@ func (r *taskRepository) CreateTask(task *models.Task) (*models.Task, error) {
 //   - *models.Task: A pointer to the updated Task.
 //   - error: An error if the update fails.
 func (r *taskRepository) UpdateTask(task *models.Task) (*models.Task, error) {
+	if task == nil {
+		return nil, apperrors.NewGenericError("Task model is nil")
+	}
 	log.Debug().Int64("taskId", task.TaskID).Str("taskName", task.Name).Msg("Updating task")
 	if err := r.db.Save(task).Error; err != nil {
 		log.Error().Err(err).Int64("taskId", task.TaskID).Str("taskName", task.Name).Msg("Failed to update task")
@@ -129,6 +149,9 @@ func (r *taskRepository) UpdateTask(task *models.Task) (*models.Task, error) {
 // Returns:
 //   - error: An error if the deletion fails.
 func (r *taskRepository) DeleteTask(task *models.Task) error {
+	if task == nil {
+		return apperrors.NewGenericError("Task model is nil")
+	}
 	log.Debug().Int64("taskId", task.TaskID).Str("taskName", task.Name).Msg("Deleting task")
 	if err := r.db.Delete(task).Error; err != nil {
 		log.Error().Err(err).Int64("taskId", task.TaskID).Str("taskName", task.Name).Msg("Failed to delete task")

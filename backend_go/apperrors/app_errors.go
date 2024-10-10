@@ -2,11 +2,6 @@ package apperrors
 
 import "errors"
 
-type AppError interface {
-	StatusCode() int
-	Error() string
-}
-
 type EmailAlreadyExistsError struct {
 	ErrorMsg string
 }
@@ -154,6 +149,14 @@ func NewAccessDeniedError(msg string) AccessDeniedError {
 }
 func NewIllegalArgumentError(msg string) IllegalArgumentError {
 	return IllegalArgumentError{ErrorMsg: msg}
+}
+
+func NewAuthenticationCredentialsNotFoundError(msg string) AuthenticationCredentialsNotFoundError {
+	return AuthenticationCredentialsNotFoundError{ErrorMsg: msg}
+}
+
+func NewInsufficientAuthenticationError(msg string) InsufficientAuthenticationError {
+	return InsufficientAuthenticationError{ErrorMsg: msg}
 }
 
 var EmailAlreadyExistsErrorDefault = NewEmailAlreadyExistsError("")

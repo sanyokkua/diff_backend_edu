@@ -232,6 +232,10 @@ func ValidateUserUpdateDTO(userUpdateDTO *dto.UserUpdateDTO) error {
 		log.Warn().Msg("UserUpdateDTO newPasswordConfirmation is empty")
 		return apperrors.NewIllegalArgumentError("UserUpdateDTO newPasswordConfirmation is nil or empty")
 	}
+	if userUpdateDTO.NewPasswordConfirmation != userUpdateDTO.NewPassword {
+		log.Warn().Msg("UserUpdateDTO newPasswordConfirmation is not equal to newPassword")
+		return apperrors.NewIllegalArgumentError("Passwords do not match")
+	}
 
 	log.Info().Msg("UserUpdateDTO validation successful")
 	return nil
