@@ -100,5 +100,5 @@ func (a *AuthController) registerUser(ctx *gin.Context) {
 	}
 
 	log.Debug().Str("email", userDTO.Email).Msg("User registered successfully")
-	utils.WriteSuccessResponse(ctx, http.StatusOK, userDTO) // Return success response with user details
+	utils.WriteSuccessResponse(ctx, http.StatusCreated, userDTO) // Return success response with user details
 }
