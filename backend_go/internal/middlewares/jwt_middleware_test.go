@@ -120,7 +120,7 @@ func (m *MockClaims) GetAudience() (jwt.ClaimStrings, error) {
 	return nil, args.Error(1)
 }
 
-// Setup a basic Gin context for testing
+// Set up a basic Gin context for testing
 func setupGinContext(authHeader string) (*gin.Context, *httptest.ResponseRecorder) {
 	gin.SetMode(gin.TestMode)
 	recorder := httptest.NewRecorder()

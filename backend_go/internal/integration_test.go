@@ -82,6 +82,7 @@ func getDBForTests() (testcontainers.Container, nat.Port, error) {
 	return postgresContainer, dbPort, nil
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func setupEnvironmentVariables(dbPort nat.Port) {
 	os.Setenv(config.DbHost, "localhost")
 	os.Setenv(config.DbUser, dbUser)
@@ -116,43 +117,50 @@ func terminateContainer(container testcontainers.Container) {
 }
 
 // Helper function to extract data from JSON response
+//
+//goland:noinspection ALL
 func extractToken(response string) string {
 	var res dto.ResponseDto[any]
 	json.Unmarshal([]byte(response), &res)
 	return res.Data.(map[string]interface{})["jwtToken"].(string)
 }
 
+//goland:noinspection ALL
 func extractUserId(response string) int64 {
 	var res dto.ResponseDto[any]
 	json.Unmarshal([]byte(response), &res)
 	return int64(res.Data.(map[string]interface{})["userId"].(float64))
 }
 
+//goland:noinspection ALL
 func extractTaskId(response string) int64 {
 	var res dto.ResponseDto[any]
 	json.Unmarshal([]byte(response), &res)
 	return int64(res.Data.(map[string]interface{})["taskId"].(float64))
 }
 
+//goland:noinspection ALL
 func extractTaskName(response string) string {
 	var res dto.ResponseDto[any]
 	json.Unmarshal([]byte(response), &res)
 	return res.Data.(map[string]interface{})["name"].(string)
 }
 
+//goland:noinspection ALL
 func extractTaskDescription(response string) string {
 	var res dto.ResponseDto[any]
 	json.Unmarshal([]byte(response), &res)
 	return res.Data.(map[string]interface{})["description"].(string)
 }
 
+//goland:noinspection ALL
 func extractTasks(response string) []dto.TaskDTO {
 	var res dto.ResponseDto[[]dto.TaskDTO]
 	json.Unmarshal([]byte(response), &res)
 	return res.Data
 }
 
-func makeRequest(t *testing.T, method, url string, body interface{}, authToken string, router *gin.Engine) *httptest.ResponseRecorder {
+func makeRequest(method, url string, body interface{}, authToken string, router *gin.Engine) *httptest.ResponseRecorder {
 	var reqBody *bytes.Buffer
 	if body != nil {
 		jsonData, _ := json.Marshal(body)
@@ -579,7 +587,7 @@ func TestAppIntegration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := makeRequest(t, tt.method, tt.url(ctx), tt.body, tt.authToken(ctx), router)
+			w := makeRequest(tt.method, tt.url(ctx), tt.body, tt.authToken(ctx), router)
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			tt.testCallback(w, ctx)
 		})

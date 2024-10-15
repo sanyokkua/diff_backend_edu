@@ -14,7 +14,7 @@ import (
 )
 
 // Helper to set up Gin, MockService, and routes
-func setupAuthTestEnvironment(setupContext func(ctx *gin.Context)) (*gin.Engine, *MockAuthService) {
+func setupAuthTestEnvironment() (*gin.Engine, *MockAuthService) {
 	gin.SetMode(gin.TestMode)
 	mockAuthService := new(MockAuthService)
 	authController := NewAuthController(mockAuthService)
@@ -64,7 +64,7 @@ func TestLoginUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, mockAuthService := setupAuthTestEnvironment(nil)
+			r, mockAuthService := setupAuthTestEnvironment()
 			if tt.mockService != nil {
 				tt.mockService(mockAuthService)
 			}
@@ -129,7 +129,7 @@ func TestRegisterUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, mockAuthService := setupAuthTestEnvironment(nil)
+			r, mockAuthService := setupAuthTestEnvironment()
 			if tt.mockService != nil {
 				tt.mockService(mockAuthService)
 			}

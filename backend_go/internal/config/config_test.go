@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+//goland:noinspection ALL
 func TestGetEnvWithDefault_ValueSet(t *testing.T) {
 	_ = os.Setenv("TEST_ENV", "value")
 	defer os.Unsetenv("TEST_ENV")
