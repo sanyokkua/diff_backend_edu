@@ -7,8 +7,8 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	"go_backend/config"
-	"go_backend/controllers"
+	"go_backend/internal/config"
+	"go_backend/internal/controllers"
 	"time"
 )
 
