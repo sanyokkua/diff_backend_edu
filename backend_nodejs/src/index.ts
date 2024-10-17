@@ -1,12 +1,13 @@
-import "./pre-start"; // Must be the first import
-import logger from "jet-logger";
+import "reflect-metadata";
+import dotenv               from "dotenv";
+import { createExpressApp } from "./app";
 
-import EnvVars from "@src/common/EnvVars";
-import server  from "./server";
 
-// **** Run **** //
+dotenv.config();
+const port = process.env.PORT ?? 3000;
 
-const SERVER_START_MSG = ("Express server started on port: " +
-    EnvVars.Port.toString());
+const App = createExpressApp();
 
-server.listen(EnvVars.Port, () => logger.info(SERVER_START_MSG));
+App.listen(port, () => {
+    console.log(`Server is running on port ${ port }`);
+});
