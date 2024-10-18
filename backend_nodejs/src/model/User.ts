@@ -6,7 +6,7 @@ import { Task }                                                     from ".";
 @Index("idx_user_email", ["email"], { unique: true })
 export class User {
     @PrimaryGeneratedColumn({ name: "user_id" })
-    id!: number;
+    id?: number;
 
     @Column({ type: "varchar", length: 255, unique: true })
     email!: string;
@@ -15,5 +15,5 @@ export class User {
     passwordHash!: string;
 
     @OneToMany(() => Task, task => task.user)
-    tasks!: Task[];
+    tasks?: Task[];
 }

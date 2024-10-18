@@ -1,16 +1,16 @@
-export type TaskDTO = {
+export type TaskDto = {
     taskId: number
     name: string
     description: string
     userId: number
 }
 
-export type TaskCreationDTO = {
+export type TaskCreationDto = {
     name: string
     description: string
 }
 
-export type TaskUpdateDTO = {
+export type TaskUpdateDto = {
     name: string
     description: string
 }

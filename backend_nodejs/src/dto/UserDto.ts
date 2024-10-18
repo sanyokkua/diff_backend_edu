@@ -1,26 +1,26 @@
-export type UserCreationDTO = {
+export type UserCreationDto = {
     email: string;
     password: string;
     passwordConfirmation: string;
 }
 
-export type UserDeletionDTO = {
+export type UserDeletionDto = {
     email: string
     currentPassword: string
 }
 
-export type UserDTO = {
+export type UserDto = {
     userId: number
     email: string
     jwtToken: string
 }
 
-export type UserLoginDTO = {
+export type UserLoginDto = {
     email: string
     password: string
 }
 
-export type UserUpdateDTO = {
+export type UserUpdateDto = {
     currentPassword: string
     newPassword: string
     newPasswordConfirmation: string

@@ -7,7 +7,7 @@ import { User }                                                     from ".";
 @Index(["name", "user"], { unique: true })
 export class Task {
     @PrimaryGeneratedColumn({ name: "task_id" })
-    id!: number;
+    id?: number;
 
     @Column({ type: "varchar", length: 255 })
     name!: string;

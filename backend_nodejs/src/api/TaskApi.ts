@@ -1,6 +1,6 @@
 import { DeleteResult, UpdateResult }              from "typeorm";
-import { TaskCreationDTO, TaskDTO, TaskUpdateDTO } from "../dto";
-import { Task, User }                              from "../models";
+import { TaskCreationDto, TaskDto, TaskUpdateDto } from "../dto";
+import { Task, User }                              from "../model";
 
 
 export interface ITaskRepository {
@@ -20,13 +20,13 @@ export interface ITaskRepository {
 }
 
 export interface ITaskService {
-    createTask(userId: number, taskCreationDTO: TaskCreationDTO): Promise<TaskDTO>;
+    createTask(userId: number, taskCreationDTO: TaskCreationDto): Promise<TaskDto>;
 
-    updateTask(userId: number, taskID: number, taskUpdateDTO: TaskUpdateDTO): Promise<TaskDTO>;
+    updateTask(userId: number, taskID: number, taskUpdateDTO: TaskUpdateDto): Promise<TaskDto>;
 
     deleteTask(userId: number, taskID: number): Promise<void>;
 
-    getAllTasksForUser(userId: number): Promise<TaskDTO[]>;
+    getAllTasksForUser(userId: number): Promise<TaskDto[]>;
 
-    getTaskByUserIDAndTaskID(userId: number, taskID: number): Promise<TaskDTO>;
+    getTaskByUserIDAndTaskID(userId: number, taskID: number): Promise<TaskDto>;
 }

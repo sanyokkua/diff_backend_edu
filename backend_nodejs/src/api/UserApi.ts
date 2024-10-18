@@ -1,6 +1,6 @@
 import { DeleteResult, UpdateResult }                               from "typeorm";
-import { UserCreationDTO, UserDeletionDTO, UserDTO, UserUpdateDTO } from "../dto";
-import { User }                                                     from "../models";
+import { UserCreationDto, UserDeletionDto, UserDto, UserUpdateDto } from "../dto";
+import { User }                                                     from "../model";
 
 
 export interface IUserRepository {
@@ -16,9 +16,9 @@ export interface IUserRepository {
 }
 
 export interface IUserService {
-    create(userCreationDTO: UserCreationDTO): Promise<UserDTO>;
+    create(userCreationDTO: UserCreationDto): Promise<UserDto>;
 
-    updatePassword(userId: number, userUpdateDTO: UserUpdateDTO): Promise<UserDTO>;
+    updatePassword(userId: number, userUpdateDTO: UserUpdateDto): Promise<UserDto>;
 
-    delete(userId: number, userDeletionDTO: UserDeletionDTO): Promise<void>;
+    delete(userId: number, userDeletionDTO: UserDeletionDto): Promise<void>;
 }

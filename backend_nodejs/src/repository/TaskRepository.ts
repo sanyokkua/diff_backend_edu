@@ -1,6 +1,7 @@
 import { DeleteResult, Repository, UpdateResult } from "typeorm";
 import { ITaskRepository }                        from "../api";
-import { Task, User }                             from "../models";
+import { IllegalArgumentError }                   from "../error";
+import { Task, User }                             from "../model";
 
 
 export class TaskRepository implements ITaskRepository {
@@ -11,30 +12,86 @@ export class TaskRepository implements ITaskRepository {
     }
 
     async findByTaskID(taskId: number): Promise<Task | null> {
-        return await this.repository.findOneBy({ id: taskId });
+        if (taskId <= 0) {
+            throw new IllegalArgumentError("ID is not valid");
+        }
+        return await this.findTask({ id: taskId });
     }
 
     async findByUserAndName(user: User, name: string): Promise<Task | null> {
-        return await this.repository.findOne({ where: { user: { id: user.id }, name: name } });
+        if (!user || !name.trim()) {
+            throw new IllegalArgumentError("Invalid params");
+        }
+        return await this.findTask({ user: user, name: name });
     }
 
     async findByUserAndTaskID(user: User, taskId: number): Promise<Task | null> {
-        return await this.repository.findOne({ where: { user: { id: user.id }, id: taskId } });
+        if (!user || taskId <= 0) {
+            throw new IllegalArgumentError("Invalid params");
+        }
+        return await this.findTask({ user: user, id: taskId });
     }
 
     async findAllByUser(user: User): Promise<Task[]> {
-        return await this.repository.find({ where: { user: { id: user.id } } });
+        if (!user) {
+            throw new IllegalArgumentError("User is null");
+        }
+        try {
+            const tasks = await this.repository.find({ where: { user: { id: user.id } } });
+            return tasks;
+        } catch (error) {
+            throw error;
+        }
     }
 
     async createTask(task: Task): Promise<Task> {
-        return await this.repository.save(task);
+        if (!task) {
+            throw new IllegalArgumentError("Task model is null");
+        }
+        try {
+            const newTask = await this.repository.save(task);
+            return newTask;
+        } catch (error) {
+            throw error;
+        }
     }
 
     async updateTask(id: number, updateData: Partial<Task>): Promise<UpdateResult> {
-        return await this.repository.update(id, updateData);
+        if (id <= 0 || !updateData) {
+            throw new IllegalArgumentError("Invalid params");
+        }
+        try {
+            const result = await this.repository.update(id, updateData);
+            return result;
+        } catch (error) {
+            throw error;
+        }
     }
 
     async deleteTask(task: Task): Promise<DeleteResult> {
-        return await this.repository.delete({ id: task.id });
+        if (!task) {
+            throw new IllegalArgumentError("Task model is nil");
+        }
+        try {
+            const result = await this.repository.delete({ id: task.id });
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Private method to encapsulate task retrieval logic.
+    private async findTask(criteria: Partial<Task>): Promise<Task | null> {
+        try {
+            const task = await this.repository.findOne({ where: criteria });
+            // if (task) {
+            //     Logger.info(`Successfully retrieved task with id: ${task.id}`);
+            // } else {
+            //     Logger.warn(`Task not found for criteria: ${JSON.stringify(criteria)}`);
+            // }
+            return task;
+        } catch (error) {
+            throw error;
+        }
     }
 }
